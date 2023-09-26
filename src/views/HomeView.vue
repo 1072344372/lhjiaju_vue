@@ -1,5 +1,6 @@
 <script>
 import request from "@/utils/request";
+
 export default {
   name: 'HomeView',
   components: {},
@@ -8,31 +9,12 @@ export default {
       search: '',
       dialogVisible: false,
       form: {},
-
-      tableData: [
-        {
-          date: '2023.9.22',
-          name: '罗汉',
-          address: '15#b404',
-        },
-        {
-          date: '2023.9.25',
-          name: '罗汉',
-          address: '15#b404',
-        },
-        {
-          date: '2023.9.28',
-          name: '罗汉',
-          address: '15#b404',
-        },
-        {
-          date: '2023.9.21',
-          name: '罗汉',
-          address: '15#b404',
-        },
-      ],
+      tableData: [],
 
     }
+  },
+  created() {
+    this.list();
   },
   //添加方法
   methods: {
@@ -41,15 +23,59 @@ export default {
       this.form = {}
     },
     save() {//填写的表单数据发送给后端
-      // 1 this.form :携带的数据
-      //2 成功后的结果
-      request.post("/api/save",this.form).then(
-          res=>{
-            console.log("res-",res);
-            this.dialogVisible=false
-          })
+
+      //确定是修改还是添加
+      if (this.form.id) {//表示update
+        //本质是发出ajax请求 异步处理 不会等到then结束再往下面走  而是直接往下走  所以关闭对话框 更新数据需要在方法里
+        request.put("/api/update", this.form).then(res => {
+          if (res.code === 200) {
+            //提示一个成功的消息框
+            this.$message({
+              type: "success",
+              message: "更新成功"
+            })
+          } else {
+            //提示一个错误的消息框
+            this.$message({
+              type: "error",
+              message: "更新失败"
+            })
+          }
+          //关闭对话框 更新数据
+          this.dialogVisible = false;
+          this.list();
+        })
+      } else {
+        // 1 this.form :携带的数据
+        // 2 成功后的结果
+        request.post("/api/save", this.form).then(
+            res => {
+              // console.log("res-", res);
+              this.dialogVisible = false
+              this.list();
+            })
+      }
+    },
+    list() {//查询全部家居
+      request.get("/api/furns").then(res => {
+        // console.log("furns的res-", res);
+        this.tableData = res.data;
+
+      })
+    },
+    handleEdit(row) {//回显的方法
+      // console.log("row-",row)
+      //将当前的家具信息绑定到弹出对话框的表单
+      //方式1 row.id 到后端去查对应的家居信息，返回后将其绑定
+      //方式2 把当前获取的row的数据通过处理，绑定到this.from进行显示
+      // JSON.stringify(row); 将row转成json字符串
+      //JSON.parse( JSON.stringify(row)) 将json字符串转成json对象
+      this.form = JSON.parse(JSON.stringify(row));
+      this.dialogVisible = true;
+
     }
   },
+
 }
 </script>
 
@@ -66,12 +92,23 @@ export default {
     </div>
 
     <el-table :data="tableData" stripe style="width: 100%">
-      <el-table-column sortable prop="date" label="日期"/>
-      <el-table-column prop="name" label="名字"/>
-      <el-table-column prop="address" label="地址"/>
+      <el-table-column prop="id" label="ID" sortable></el-table-column>
+      <el-table-column prop="name" label="家居名">
+      </el-table-column>
+      <el-table-column prop="maker" label="厂家">
+      </el-table-column>
+      <el-table-column prop="price" label="价格">
+      </el-table-column>
+      <el-table-column prop="sales" label="销量">
+      </el-table-column>
+      <el-table-column prop="stock" label="库存">
+      </el-table-column>
       <el-table-column fixed="right" label="操作" width="150">
-        <template #default>
-          <el-button type="text">编辑</el-button>
+        <!--说明
+        handleEdit(scope.row) 可以将当前行的数据传递给handleEdit方法
+        -->
+        <template #default="scope">
+          <el-button type="text" @click="handleEdit(scope.row)">编辑</el-button>
           <el-button type="text">删除</el-button>
         </template>
       </el-table-column>
