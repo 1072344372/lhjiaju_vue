@@ -1,12 +1,13 @@
 <script>
+import request from "@/utils/request";
 export default {
   name: 'HomeView',
   components: {},
   data() {
     return {
       search: '',
-      dialogVisible:false,
-      form:{},
+      dialogVisible: false,
+      form: {},
 
       tableData: [
         {
@@ -34,10 +35,19 @@ export default {
     }
   },
   //添加方法
-  methods:{
-    add(){
-      this.dialogVisible=true;
-      this.form={}
+  methods: {
+    add() {//显示添加对话框
+      this.dialogVisible = true;
+      this.form = {}
+    },
+    save() {//填写的表单数据发送给后端
+      // 1 this.form :携带的数据
+      //2 成功后的结果
+      request.post("/api/save",this.form).then(
+          res=>{
+            console.log("res-",res);
+            this.dialogVisible=false
+          })
     }
   },
 }
@@ -94,12 +104,11 @@ export default {
         </el-form-item>
       </el-form>
       <template #footer>
-        <span class="dialog-footer">
-         <el-button @click="dialogVisible = false">取 消</el-button>
-         <el-button type="primary" @click="save">确 定</el-button>
-         </span>
-       </template>
+          <span class="dialog-footer">
+           <el-button @click="dialogVisible = false">取 消</el-button>
+           <el-button type="primary" @click="save">确 定</el-button>
+           </span>
+      </template>
     </el-dialog>
   </div>
-
 </template>

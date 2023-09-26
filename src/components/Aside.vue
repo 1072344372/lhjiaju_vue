@@ -10,8 +10,7 @@ export default {
   <el-menu
       style="width:200px"
       default-active="2"
-      class="el-menu-vertical-demo"
-  >
+      class="el-menu-vertical-demo">
     <el-sub-menu index="1">
       <template #title>
         <el-icon><location /></el-icon>

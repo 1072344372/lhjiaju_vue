@@ -8,10 +8,10 @@
 display: flex">
     <div style="width: 200px; padding-left: 30px; font-weight: bold; color:dodgerblue">后台管理</div>
     <div style="flex: 1"></div>
-    <div style="width: 100px;margin-top: 10px">
+    <div style="width: 100px;margin-top: 10px;margin-right: 30px;font-size: 30px">
       <el-dropdown>
     <span class="el-dropdown-link">
-      luohan
+      罗汉
     </span>
         <template #dropdown>
           <el-dropdown-menu>
