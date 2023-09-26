@@ -68,11 +68,12 @@ export default {
       //
       // })
 
-      //请求分页查询
-      request.get("/api/furnsByPage", {
+      //请求分页查询-条件查询
+      request.get("/api/furnsByConditionPage", {
         params: {//指定请求携带的参数
           pageNum: this.currentPage,
-          pageSize: this.pageSize
+          pageSize: this.pageSize,
+          search:this.search
         }
       }).then(
           res => {//处理返回的分页信息
@@ -138,7 +139,7 @@ export default {
 
     <div style="margin: 10px 5px">
       <el-input v-model="search" style="width: 30%;" placeholder="请输入"/>
-      <el-button style="margin-outside: 10px" type="primary">查询</el-button>
+      <el-button style="margin-outside: 10px" type="primary" @click="list">查询</el-button>
     </div>
 
     <el-table :data="tableData" stripe style="width: 100%">
