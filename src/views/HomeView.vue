@@ -6,6 +6,11 @@ export default {
   components: {},
   data() {
     return {
+      //增加分页相应的数据
+      currentPage: 1,//当前页
+      pageSize: 5,//每页显示记录数
+      total: 10,//共有多少数据
+
       search: '',
       dialogVisible: false,
       form: {},
@@ -57,11 +62,24 @@ export default {
       }
     },
     list() {//查询全部家居
-      request.get("/api/furns").then(res => {
-        // console.log("furns的res-", res);
-        this.tableData = res.data;
+      // request.get("/api/furns").then(res => {
+      //   // console.log("furns的res-", res);
+      //   this.tableData = res.data;
+      //
+      // })
 
-      })
+      //请求分页查询
+      request.get("/api/furnsByPage", {
+        params: {//指定请求携带的参数
+          pageNum: this.currentPage,
+          pageSize: this.pageSize
+        }
+      }).then(
+          res => {//处理返回的分页信息
+            this.tableData = res.data.records
+            this.total = res.data.total
+          }
+      )
     },
     handleEdit(row) {//回显的方法
       // console.log("row-",row)
@@ -73,7 +91,39 @@ export default {
       this.form = JSON.parse(JSON.stringify(row));
       this.dialogVisible = true;
 
-    }
+    },
+    handleDel(id) {//回显的方法
+      // console.log("要删除的id:", id);
+      request.delete("/api/del/" + id).then(res => {
+        if (res.code === 200) {
+          //提示一个成功的消息框
+          this.$message({
+            type: "success",
+            message: "删除成功"
+          })
+        } else {
+          //提示一个错误的消息框
+          this.$message({
+            type: "error",
+            message: "删除失败"
+          })
+        }
+        //关闭对话框 更新数据
+        this.dialogVisible = false;
+        this.list();
+      })
+    },
+    handleCurrentChange(pageNum) {//处理分页的请求
+      //当用户点击分页超连接时，会携带pageNum
+      console.log("pageNum:", pageNum)
+      this.currentPage = pageNum
+      //发出请求
+      this.list()
+    },
+    handlePageSizeChange(pageSize){
+      this.pageSize=pageSize
+      this.list()
+    },
   },
 
 }
@@ -103,13 +153,18 @@ export default {
       </el-table-column>
       <el-table-column prop="stock" label="库存">
       </el-table-column>
-      <el-table-column fixed="right" label="操作" width="150">
+      <el-table-column fixed="right" label="操作" width="150" align="center">
         <!--说明
         handleEdit(scope.row) 可以将当前行的数据传递给handleEdit方法
         -->
         <template #default="scope">
           <el-button type="text" @click="handleEdit(scope.row)">编辑</el-button>
-          <el-button type="text">删除</el-button>
+          <!-- 确定就触发handleDel 取消不会触发 -->
+          <el-popconfirm title="确认删除?" @confirm="handleDel(scope.row.id)">
+            <template #reference>
+              <el-button size="small" type="danger">删除</el-button>
+            </template>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -147,5 +202,19 @@ export default {
            </span>
       </template>
     </el-dialog>
+    <!--    <el-pagination background layout="prev, pager, next" :total="1000" />-->
+
+    <!--    添加分页插件-->
+    <div style="margin: 10px 0">
+      <el-pagination
+          @size-change="handlePageSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[2,5,10,15]"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total">
+      </el-pagination>
+    </div>
   </div>
 </template>
