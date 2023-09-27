@@ -15,6 +15,31 @@ export default {
       dialogVisible: false,
       form: {},
       tableData: [],
+      rules: {
+        name: [
+          //required: true 必须填写
+          //message: '请输入称家居名' 失败提示
+          //
+          {required: true, message: '请输入称家居名', trigger: 'blur'}
+        ], maker: [
+          {required: true, message: '请输入称制造商', trigger: 'blur'}
+        ], price: [
+          {required: true, message: '请输入价格', trigger: 'blur'}, {
+            pattern: /^(([1-9]\d*)|(0))(\.\d+)?$/,
+            message: '请输入数字',
+            trigger: 'blur'
+          }
+        ], sales: [
+          {required: true, message: '请输入销量', trigger: 'blur'}, {
+            pattern: /^(([1-9]\d*)|(0))$/,
+            message: '请输入数字',
+            trigger: 'blur'
+          }
+        ], stock: [
+          {required: true, message: '请输入库存', trigger: 'blur'},
+          {pattern: /^(([1-9]\d*)|(0))$/, message: '请输入数字', trigger: 'blur'}
+        ]
+      },
 
     }
   },
@@ -25,7 +50,8 @@ export default {
   methods: {
     add() {//显示添加对话框
       this.dialogVisible = true;
-      this.form = {}
+      this.form = {};
+      // this.$refs['form'].resetFields();//将添加验证提示消息，清空
     },
     save() {//填写的表单数据发送给后端
 
@@ -50,15 +76,32 @@ export default {
           this.dialogVisible = false;
           this.list();
         })
-      } else {
-        // 1 this.form :携带的数据
-        // 2 成功后的结果
-        request.post("/api/save", this.form).then(
-            res => {
-              // console.log("res-", res);
-              this.dialogVisible = false
-              this.list();
+      } else {//添加
+        this.$refs['form'].validate((valid) => {
+          if (valid) {
+            //=======说明======
+            //1. 将 form 表单提交给 /api/save 的接口
+            //2. /api/save 等价 http://localhost:10001/save
+            //3. 如果成功，就进入 then 方法
+            //4. res 就是返回的信息
+            //5. 查看 Mysql 看看数据是否保存
+            // 1 this.form :携带的数据
+            // 2 成功后的结果
+            request.post("/api/save", this.form).then(
+                res => {
+                  // console.log("res-", res);
+                  this.dialogVisible = false
+                  this.list();
+                })
+          } else {
+            this.$message({//弹出更新失败信息
+              type: "error", message: "验证失败，不提交"
             })
+            return false
+          }
+        })
+
+
       }
     },
     list() {//查询全部家居
@@ -73,7 +116,7 @@ export default {
         params: {//指定请求携带的参数
           pageNum: this.currentPage,
           pageSize: this.pageSize,
-          search:this.search
+          search: this.search
         }
       }).then(
           res => {//处理返回的分页信息
@@ -121,8 +164,8 @@ export default {
       //发出请求
       this.list()
     },
-    handlePageSizeChange(pageSize){
-      this.pageSize=pageSize
+    handlePageSizeChange(pageSize) {
+      this.pageSize = pageSize
       this.list()
     },
   },
@@ -131,18 +174,18 @@ export default {
 </script>
 
 <template>
-  <div>
-    <div style="margin: 10px 5px">
+  <div class="主题">
+    <div class="新增/其他" style="margin: 10px 5px">
       <el-button type="primary" @click="add">新增</el-button>
       <el-button>其他</el-button>
     </div>
 
-    <div style="margin: 10px 5px">
+    <div class="搜索" style="margin: 10px 5px">
       <el-input v-model="search" style="width: 30%;" placeholder="请输入"/>
       <el-button style="margin-outside: 10px" type="primary" @click="list">查询</el-button>
     </div>
 
-    <el-table :data="tableData" stripe style="width: 100%">
+    <el-table class="显示数据的表格" :data="tableData" stripe style="width: 100%">
       <el-table-column prop="id" label="ID" sortable></el-table-column>
       <el-table-column prop="name" label="家居名">
       </el-table-column>
@@ -179,20 +222,20 @@ export default {
     后台 Javabean 属性一致
     -->
     <el-dialog title="提示" v-model="dialogVisible" width="30%">
-      <el-form :model="form" label-width="120px">
-        <el-form-item label="家居名">
+      <el-form :model="form" :rules="rules" ref="form" label-width="120px">
+        <el-form-item label="家居名" prop="name">
           <el-input v-model="form.name" style="width: 80%"></el-input>
         </el-form-item>
-        <el-form-item label="厂商">
+        <el-form-item label="厂商" prop="maker">
           <el-input v-model="form.maker" style="width: 80%"></el-input>
         </el-form-item>
-        <el-form-item label="价格">
+        <el-form-item label="价格" prop="price">
           <el-input v-model="form.price" style="width: 80%"></el-input>
         </el-form-item>
-        <el-form-item label="销量">
+        <el-form-item label="销量" prop="sales">
           <el-input v-model="form.sales" style="width: 80%"></el-input>
         </el-form-item>
-        <el-form-item label="库存">
+        <el-form-item label="库存" prop="stock">
           <el-input v-model="form.stock" style="width: 80%"></el-input>
         </el-form-item>
       </el-form>
@@ -206,7 +249,7 @@ export default {
     <!--    <el-pagination background layout="prev, pager, next" :total="1000" />-->
 
     <!--    添加分页插件-->
-    <div style="margin: 10px 0">
+    <div class="分页插件" style="margin: 10px 0">
       <el-pagination
           @size-change="handlePageSizeChange"
           @current-change="handleCurrentChange"
