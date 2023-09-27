@@ -6,6 +6,7 @@ export default {
   components: {},
   data() {
     return {
+      serverValidErrors:{},//后端错误效验信息
       //增加分页相应的数据
       currentPage: 1,//当前页
       pageSize: 5,//每页显示记录数
@@ -51,7 +52,9 @@ export default {
     add() {//显示添加对话框
       this.dialogVisible = true;
       this.form = {};
-      // this.$refs['form'].resetFields();//将添加验证提示消息，清空
+      this.$refs['form'].resetFields();
+      // this.$refs.form.resetFields()
+      this.serverValidErrors={}
     },
     save() {//填写的表单数据发送给后端
 
@@ -78,6 +81,7 @@ export default {
         })
       } else {//添加
         this.$refs['form'].validate((valid) => {
+          // valid=true;
           if (valid) {
             //=======说明======
             //1. 将 form 表单提交给 /api/save 的接口
@@ -89,9 +93,18 @@ export default {
             // 2 成功后的结果
             request.post("/api/save", this.form).then(
                 res => {
-                  // console.log("res-", res);
-                  this.dialogVisible = false
-                  this.list();
+                  if(res.code===200){
+                    // console.log("res-", res);
+                    this.dialogVisible = false
+                    this.list();
+                  }else if(res.code===0){
+                    this.serverValidErrors.name=res.msgMap.name
+                    this.serverValidErrors.price=res.msgMap.price
+                    this.serverValidErrors.maker=res.msgMap.maker
+                    this.serverValidErrors.stock=res.msgMap.stock
+                    this.serverValidErrors.sales=res.msgMap.sales
+                  }
+
                 })
           } else {
             this.$message({//弹出更新失败信息
@@ -225,18 +238,23 @@ export default {
       <el-form :model="form" :rules="rules" ref="form" label-width="120px">
         <el-form-item label="家居名" prop="name">
           <el-input v-model="form.name" style="width: 80%"></el-input>
+          {{serverValidErrors.name}}
         </el-form-item>
         <el-form-item label="厂商" prop="maker">
           <el-input v-model="form.maker" style="width: 80%"></el-input>
+          {{serverValidErrors.maker}}
         </el-form-item>
         <el-form-item label="价格" prop="price">
           <el-input v-model="form.price" style="width: 80%"></el-input>
+          {{serverValidErrors.price}}
         </el-form-item>
         <el-form-item label="销量" prop="sales">
           <el-input v-model="form.sales" style="width: 80%"></el-input>
+          {{serverValidErrors.sales}}
         </el-form-item>
         <el-form-item label="库存" prop="stock">
           <el-input v-model="form.stock" style="width: 80%"></el-input>
+          {{serverValidErrors.stock}}
         </el-form-item>
       </el-form>
       <template #footer>
