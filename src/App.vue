@@ -21,11 +21,11 @@ export default {
   -->
   <div>
     <!--引入header-->
-    <Header/>
+<!--    <Header/>-->
     <!--引入主题-->
     <div style="display: flex">
       <!--    侧边栏-->
-      <Aside/>
+<!--      <Aside/>-->
       <!--引入内容区域 通过路由展示  默认路由到 /
       比如http://localhost:10000/ =》HomeView.vue
       -->

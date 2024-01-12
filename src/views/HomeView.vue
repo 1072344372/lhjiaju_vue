@@ -1,9 +1,106 @@
+
+<template>
+  <div class="主题">
+    <div class="新增/其他" style="margin: 10px 5px">
+      <el-button type="primary" @click="add">新增</el-button>
+      <el-button>其他</el-button>
+    </div>
+
+    <div class="搜索" style="margin: 10px 5px">
+      <el-input v-model="search" style="width: 30%;" placeholder="请输入"/>
+      <el-button style="margin-outside: 10px" type="primary" @click="list">查询</el-button>
+    </div>
+
+    <el-table class="显示数据的表格" :data="tableData" stripe style="width: 100%">
+      <el-table-column prop="id" label="ID" sortable></el-table-column>
+      <el-table-column prop="name" label="家居名">
+      </el-table-column>
+      <el-table-column prop="maker" label="厂家">
+      </el-table-column>
+      <el-table-column prop="price" label="价格">
+      </el-table-column>
+      <el-table-column prop="sales" label="销量">
+      </el-table-column>
+      <el-table-column prop="stock" label="库存">
+      </el-table-column>
+      <el-table-column fixed="right" label="操作" width="150" align="center">
+        <!--说明
+        handleEdit(scope.row) 可以将当前行的数据传递给handleEdit方法
+        -->
+        <template #default="scope">
+          <el-button type="text" @click="handleEdit(scope.row)">编辑</el-button>
+          <!-- 确定就触发handleDel 取消不会触发 -->
+          <el-popconfirm title="确认删除?" @confirm="handleDel(scope.row.id)">
+            <template #reference>
+              <el-button size="small" type="danger">删除</el-button>
+            </template>
+          </el-popconfirm>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- 添加家居的弹窗
+    说明:
+    1. el-dialog ：v-model="dialogVisible" 表示对话框, 和 dialogVisible 变量双向
+    绑定,控制是否显示对话框
+    2. el-form :model="form" 表示表单 ,数据和 form 数据变量双向绑定
+    3. el-input v-model="form.name" 表示表单的 input 空间，名字为 name 需要和
+    后台 Javabean 属性一致
+    -->
+    <el-dialog title="提示" v-model="dialogVisible" width="30%">
+      <el-form :model="form" :rules="rules" ref="form" label-width="120px">
+        <el-form-item label="家居名" prop="name">
+          <el-input v-model="form.name" style="width: 80%"></el-input>
+          {{serverValidErrors.name}}
+        </el-form-item>
+        <el-form-item label="厂商" prop="maker">
+          <el-input v-model="form.maker" style="width: 80%"></el-input>
+          {{serverValidErrors.maker}}
+        </el-form-item>
+        <el-form-item label="价格" prop="price">
+          <el-input v-model="form.price" style="width: 80%"></el-input>
+          {{serverValidErrors.price}}
+        </el-form-item>
+        <el-form-item label="销量" prop="sales">
+          <el-input v-model="form.sales" style="width: 80%"></el-input>
+          {{serverValidErrors.sales}}
+        </el-form-item>
+        <el-form-item label="库存" prop="stock">
+          <el-input v-model="form.stock" style="width: 80%"></el-input>
+          {{serverValidErrors.stock}}
+        </el-form-item>
+      </el-form>
+      <template #footer>
+          <span class="dialog-footer">
+           <el-button @click="dialogVisible = false">取 消</el-button>
+           <el-button type="primary" @click="save">确 定</el-button>
+           </span>
+      </template>
+    </el-dialog>
+    <!--    <el-pagination background layout="prev, pager, next" :total="1000" />-->
+
+    <!--    添加分页插件-->
+    <div class="分页插件" style="margin: 10px 0">
+      <el-pagination
+          @size-change="handlePageSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[2,5,10,15]"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total">
+      </el-pagination>
+    </div>
+  </div>
+</template>
+
 <script>
 import request from "@/utils/request";
-
 export default {
   name: 'HomeView',
-  components: {},
+  components: {
+
+  },
   data() {
     return {
       serverValidErrors:{},//后端错误效验信息
@@ -186,97 +283,3 @@ export default {
 }
 </script>
 
-<template>
-  <div class="主题">
-    <div class="新增/其他" style="margin: 10px 5px">
-      <el-button type="primary" @click="add">新增</el-button>
-      <el-button>其他</el-button>
-    </div>
-
-    <div class="搜索" style="margin: 10px 5px">
-      <el-input v-model="search" style="width: 30%;" placeholder="请输入"/>
-      <el-button style="margin-outside: 10px" type="primary" @click="list">查询</el-button>
-    </div>
-
-    <el-table class="显示数据的表格" :data="tableData" stripe style="width: 100%">
-      <el-table-column prop="id" label="ID" sortable></el-table-column>
-      <el-table-column prop="name" label="家居名">
-      </el-table-column>
-      <el-table-column prop="maker" label="厂家">
-      </el-table-column>
-      <el-table-column prop="price" label="价格">
-      </el-table-column>
-      <el-table-column prop="sales" label="销量">
-      </el-table-column>
-      <el-table-column prop="stock" label="库存">
-      </el-table-column>
-      <el-table-column fixed="right" label="操作" width="150" align="center">
-        <!--说明
-        handleEdit(scope.row) 可以将当前行的数据传递给handleEdit方法
-        -->
-        <template #default="scope">
-          <el-button type="text" @click="handleEdit(scope.row)">编辑</el-button>
-          <!-- 确定就触发handleDel 取消不会触发 -->
-          <el-popconfirm title="确认删除?" @confirm="handleDel(scope.row.id)">
-            <template #reference>
-              <el-button size="small" type="danger">删除</el-button>
-            </template>
-          </el-popconfirm>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <!-- 添加家居的弹窗
-    说明:
-    1. el-dialog ：v-model="dialogVisible" 表示对话框, 和 dialogVisible 变量双向
-    绑定,控制是否显示对话框
-    2. el-form :model="form" 表示表单 ,数据和 form 数据变量双向绑定
-    3. el-input v-model="form.name" 表示表单的 input 空间，名字为 name 需要和
-    后台 Javabean 属性一致
-    -->
-    <el-dialog title="提示" v-model="dialogVisible" width="30%">
-      <el-form :model="form" :rules="rules" ref="form" label-width="120px">
-        <el-form-item label="家居名" prop="name">
-          <el-input v-model="form.name" style="width: 80%"></el-input>
-          {{serverValidErrors.name}}
-        </el-form-item>
-        <el-form-item label="厂商" prop="maker">
-          <el-input v-model="form.maker" style="width: 80%"></el-input>
-          {{serverValidErrors.maker}}
-        </el-form-item>
-        <el-form-item label="价格" prop="price">
-          <el-input v-model="form.price" style="width: 80%"></el-input>
-          {{serverValidErrors.price}}
-        </el-form-item>
-        <el-form-item label="销量" prop="sales">
-          <el-input v-model="form.sales" style="width: 80%"></el-input>
-          {{serverValidErrors.sales}}
-        </el-form-item>
-        <el-form-item label="库存" prop="stock">
-          <el-input v-model="form.stock" style="width: 80%"></el-input>
-          {{serverValidErrors.stock}}
-        </el-form-item>
-      </el-form>
-      <template #footer>
-          <span class="dialog-footer">
-           <el-button @click="dialogVisible = false">取 消</el-button>
-           <el-button type="primary" @click="save">确 定</el-button>
-           </span>
-      </template>
-    </el-dialog>
-    <!--    <el-pagination background layout="prev, pager, next" :total="1000" />-->
-
-    <!--    添加分页插件-->
-    <div class="分页插件" style="margin: 10px 0">
-      <el-pagination
-          @size-change="handlePageSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="currentPage"
-          :page-sizes="[2,5,10,15]"
-          :page-size="pageSize"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total">
-      </el-pagination>
-    </div>
-  </div>
-</template>
