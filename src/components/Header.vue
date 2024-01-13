@@ -11,7 +11,7 @@ display: flex">
     <div style="width: 100px;margin-top: 10px;margin-right: 30px;font-size: 30px">
       <el-dropdown>
     <span class="el-dropdown-link">
-      罗汉
+      admin
     </span>
         <template #dropdown>
           <el-dropdown-menu>
@@ -23,7 +23,11 @@ display: flex">
     </div>
   </div>
 </template>
-
+<script>
+export default {
+  name: "Header.vue"
+}
+</script>
 <style >
 
 </style>

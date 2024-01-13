@@ -3,7 +3,7 @@
   <div class="主题">
     <div class="新增/其他" style="margin: 10px 5px">
       <el-button type="primary" @click="add">新增</el-button>
-      <el-button>其他</el-button>
+
     </div>
 
     <div class="搜索" style="margin: 10px 5px">

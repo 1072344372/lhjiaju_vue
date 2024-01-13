@@ -30,7 +30,7 @@ request.interceptors.response.use(
         }
         return res;
     },error => {
-        consolo.error("err",error)
+        console.error("err",error)
         // 拒绝处理结果返回
         return Promise.reject(error)
     }

@@ -4,7 +4,7 @@
     <div class="login_box">
       <!-- 头像区域 -->
       <div class="avatar_box">
-        <img src="https://lhwaimai.oss-cn-beijing.aliyuncs.com/logo/logo.jpg" alt="" />
+        <img src="https://lhwaimai.oss-cn-beijing.aliyuncs.com/logo/logo.jpg" alt=""/>
       </div>
       <!-- 登录表单区域 -->
       <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules" label-width="0px" class="login_form">
@@ -25,23 +25,18 @@
       </el-form>
     </div>
     <vue-particles class="login-bg" color="#39AFFD" :particleOpacity="0.7" :particlesNumber="100" shapeType="circle"
-                   :particleSize="4" linesColor="#8DD1FE" :linesWidth="1" :lineLinked="true" :lineOpacity="0.4" :linesDistance="150"
+                   :particleSize="4" linesColor="#8DD1FE" :linesWidth="1" :lineLinked="true" :lineOpacity="0.4"
+                   :linesDistance="150"
                    :moveSpeed="3" :hoverEffect="true" hoverMode="grab" :clickEffect="true" clickMode="push">
     </vue-particles>
-    <div class="footer">
-      <span>
-        <!-- <i class="iconfont icon-haoyou " @click="goUser"></i> -->
-      </span>
-      <span>
-        <i class="iconfont icon-guanliyuan" @click="goManage"></i>
-      </span>
-    </div>
-
   </div>
 </template>
 
 <script>
-import { ElForm, ElFormItem, ElInput, ElButton } from 'element-plus';
+import {ElForm, ElFormItem, ElInput, ElButton} from 'element-plus';
+import {getRequest, postRequest} from "@/http";
+import router  from "@/router";
+
 export default {
   components: {
     ElForm,
@@ -53,14 +48,14 @@ export default {
     return {
       //登录表单
       loginForm: {
-        username: "",
-        password: "",
+        username: "admin",
+        password: "123456",
       },
 
       //登录表单规则的验证对象
       loginFormRules: {
         username: [
-          { required: true, message: "用户名不能为空", trigger: "blur" },
+          {required: true, message: "用户名不能为空", trigger: "blur"},
           {
             min: 3,
             max: 20,
@@ -69,7 +64,7 @@ export default {
           },
         ],
         password: [
-          { required: true, message: "密码不能为空", trigger: "blur" },
+          {required: true, message: "密码不能为空", trigger: "blur"},
           {
             min: 6,
             max: 15,
@@ -93,42 +88,34 @@ export default {
           return;
         }
         this.loginLoading = true;
-        // 进行md5加密
-        const salt = "xiaobaitiao";
         const username = this.loginForm.username;
-        const password = CryptoJS.MD5(salt + this.loginForm.password).toString();
+        const password = this.loginForm.password;
         //向数据库发送axios请求，如果登录成功，就跳转
-        const { data: res } = await this.$http.post(
-            "user/login",
-            {
-              username,
-              password
-            }
-        );
-        if (res.status !== 200) {
-          this.loginLoading = false;
-          return this.$message.error(res.msg);
-        }
-        // console.log(res);
-        this.$message.success("登录成功");
-        this.loginLoading = false;
-        window.sessionStorage.setItem("token", res.map.token);
-        window.sessionStorage.setItem("userId", res.map.id);
-        this.$router.push("/home"); //跳转到home页面下
+        postRequest("/api/admin/login",{username,password})
+            .then(res => {
+              // 处理请求成功的逻辑，可以根据实际情况进行页面跳转等操作
+              console.log(res);
+              if (res.code===200){
+                  console.log("登录成功")
+              }
+              router.push("/furn")
+            })
+            .catch(error => {
+              // 处理请求失败的逻辑
+              console.error(error);
+            })
+            .finally(() => {
+              // 无论请求成功还是失败，都在最终执行块中停止加载状态
+              this.loginLoading = false;
+            });
       });
-    },
-    goUser() {
-      this.$router.push("/login");
-    },
-    goManage() {
-      this.$router.push("/loginmanage");
     },
   },
 };
 </script>
 <style lang="css" scoped>
 .login_container {
-  background: url(https://xxx.xiaobaitiao.club/img/digitalCityMin.png) no-repeat 0px 0px;
+  background: url(https://lh-assets.oss-cn-beijing.aliyuncs.com/assets/imgs/bg/bg1.png) no-repeat 0px 0px;
   background-size: cover;
   height: 100%;
 }
